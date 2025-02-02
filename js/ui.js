@@ -94,8 +94,9 @@ class UI {
                         </div>
                     </div>
                     <p class="text-gray-300 mb-6">${overview}</p>
-                    ${this.createCastSection(data.credits?.cast)}
                     ${this.createVideoSection(data.videos?.results)}
+                    ${this.createCastSection(data.credits?.cast)}
+                    ${this.createWatchProvidersSection(data.watch_providers)}
                 </div>
             </div>
         `;
@@ -131,14 +132,17 @@ class UI {
     static createVideoSection(videos) {
         if (!videos || videos.length === 0) return '';
         
-        const trailer = videos.find(video => video.type === 'Trailer') || videos[0];
+        const trailer = videos.find(video => 
+            video.type === 'Trailer' && video.site === 'YouTube'
+        ) || videos.find(video => video.site === 'YouTube') || videos[0];
+
         if (!trailer) return '';
 
         return `
-            <div>
+            <div class="mb-6">
                 <h3 class="text-xl font-semibold mb-4">Trailer</h3>
                 <div class="relative pt-[56.25%] bg-black rounded-lg overflow-hidden">
-                    <iframe src="https://www.youtube.com/embed/${trailer.key}"
+                    <iframe src="https://www.youtube.com/embed/${trailer.key}?rel=0"
                             class="absolute inset-0 w-full h-full"
                             frameborder="0"
                             allow="autoplay; encrypted-media"
@@ -146,6 +150,70 @@ class UI {
                 </div>
             </div>
         `;
+    }
+
+    static createWatchProvidersSection(providers) {
+        if (!providers) return '';
+
+        const sections = [];
+
+        // Streaming providers
+        if (providers.flatrate?.length) {
+            sections.push(`
+                <div class="mb-4">
+                    <h4 class="text-lg font-semibold mb-2">Stream</h4>
+                    <div class="flex flex-wrap gap-2">
+                        ${providers.flatrate.map(provider => `
+                            <img src="${TMDbAPI.getImageUrl(provider.logo_path)}" 
+                                 alt="${provider.provider_name}"
+                                 title="${provider.provider_name}"
+                                 class="w-12 h-12 rounded-lg">
+                        `).join('')}
+                    </div>
+                </div>
+            `);
+        }
+
+        // Rental providers
+        if (providers.rent?.length) {
+            sections.push(`
+                <div class="mb-4">
+                    <h4 class="text-lg font-semibold mb-2">Rent</h4>
+                    <div class="flex flex-wrap gap-2">
+                        ${providers.rent.map(provider => `
+                            <img src="${TMDbAPI.getImageUrl(provider.logo_path)}" 
+                                 alt="${provider.provider_name}"
+                                 title="${provider.provider_name}"
+                                 class="w-12 h-12 rounded-lg">
+                        `).join('')}
+                    </div>
+                </div>
+            `);
+        }
+
+        // Buy providers
+        if (providers.buy?.length) {
+            sections.push(`
+                <div class="mb-4">
+                    <h4 class="text-lg font-semibold mb-2">Buy</h4>
+                    <div class="flex flex-wrap gap-2">
+                        ${providers.buy.map(provider => `
+                            <img src="${TMDbAPI.getImageUrl(provider.logo_path)}" 
+                                 alt="${provider.provider_name}"
+                                 title="${provider.provider_name}"
+                                 class="w-12 h-12 rounded-lg">
+                        `).join('')}
+                    </div>
+                </div>
+            `);
+        }
+
+        return sections.length ? `
+            <div class="mb-6">
+                <h3 class="text-xl font-semibold mb-4">Where to Watch</h3>
+                ${sections.join('')}
+            </div>
+        ` : '';
     }
 
     static async getWhereToWatch(id, type) {
