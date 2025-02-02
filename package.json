@@ -5,14 +5,18 @@
   "main": "index.js",
   "scripts": {
     "build": "tailwindcss -i ./css/main.css -o ./css/styles.css --watch",
+    "dev": "npx live-server --port=3000",
+    "start": "npm-run-all --parallel build dev",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "autoprefixer": "^10.4.20",
-    "postcss": "^8.5.1",
-    "tailwindcss": "^4.0.3"
+    "autoprefixer": "^10.4.17",
+    "live-server": "^1.2.2",
+    "npm-run-all": "^4.1.5",
+    "postcss": "^8.4.35",
+    "tailwindcss": "^3.4.1"
   }
 }
